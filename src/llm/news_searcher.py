@@ -98,8 +98,8 @@ class NewsSearcher:
 
         prompt = build_news_search_prompt(
             companies=companies,
-            start_date=start_date.strftime("%Y/%m/%d"),
-            end_date=end_date.strftime("%Y/%m/%d"),
+            start_date=start_date.strftime("%Y-%m-%d"),
+            end_date=end_date.strftime("%Y-%m-%d"),
         )
 
         res = self.agent.generate_json(
