@@ -3,7 +3,7 @@ from configs import NEWS_FIELDS, FINANCIAL_FIELDS
 from context import ProjectContext
 from metrics.news_metrics import calc_news_metrics
 from metrics.financial_metrics import calc_financial_metrics
-from utils.excel_utils import load_from_excel
+from utils.excel_utils import export_to_excel, load_from_excel
 from utils.network_utils import check_bbg_connection
 import blpapi
 import pandas as pd
@@ -246,8 +246,10 @@ class BloombergClient:
         cols += [col for col in news_metric_df.columns if col not in cols]
         news_metric_df = news_metric_df[cols]
         news_metric_df.drop(columns=["BloombergAvailable"])
-        news_metric_df.to_excel(
-            context.paths.news_metric, index=False, sheet_name="NewsMetrics"
+        export_to_excel(
+            data=news_metric_df,
+            file_path=context.paths.news_metric, 
+            sheet_name="NewsMetrics"
         )
         return news_metric_df
 
@@ -288,9 +290,9 @@ class BloombergClient:
             errors="ignore",
         )
 
-        financial_metric_df.to_excel(
-            context.paths.financial_metric,
-            index=False,
+        export_to_excel(
+            data=financial_metric_df,
+            file_path=context.paths.financial_metric,
             sheet_name="FinancialMetrics",
         )
 
@@ -317,9 +319,9 @@ class BloombergClient:
             errors="ignore",
         )
 
-        metric_df.to_excel(
-            output_path,
-            index=False,
+        export_to_excel(
+            data=metric_df,
+            file_path=output_path,
             sheet_name="Metrics",
         )
 

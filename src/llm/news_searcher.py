@@ -5,7 +5,7 @@ from configs import SEARCH_PROVIDER
 from context import ProjectContext
 from llm.llm_agent import LLMAgent
 from llm.prompts import build_news_search_prompt
-from utils.excel_utils import load_from_excel
+from utils.excel_utils import export_to_excel, load_from_excel
 
 logger = logging.getLogger(__name__)
 
@@ -76,9 +76,9 @@ class NewsSearcher:
                     ignore_index=True,
                 )
 
-                result_df.to_excel(
-                    output_file,
-                    index=False,
+                export_to_excel(
+                    data=result_df,
+                    file_path=output_file,
                     sheet_name="LlmNews",
                 )
 

@@ -5,7 +5,7 @@ from datetime import date
 from tqdm import tqdm
 from context import ProjectContext
 from spiders.google_news import GoogleNewsSpider
-from utils.excel_utils import load_from_excel
+from utils.excel_utils import export_to_excel, load_from_excel
 
 
 logger = logging.getLogger(__name__)
@@ -85,5 +85,9 @@ class NewsSpider:
             start_date=context.period.analysis_start_date, 
             end_date=context.period.analysis_end_date
         )
-        raw_news_df.to_excel(context.paths.raw_news, index=False, sheet_name="RawNews")
+        export_to_excel(
+            data=raw_news_df,
+            file_path=context.paths.raw_news, 
+            sheet_name="RawNews"
+        )
         return raw_news_df

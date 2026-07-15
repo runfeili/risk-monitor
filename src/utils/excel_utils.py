@@ -3,8 +3,8 @@ import logging
 import os
 
 from pathlib import Path
-from openpyxl import load_workbook
 from openpyxl.styles import Alignment
+from numbers import Number
 
 
 logger = logging.getLogger(__name__)
@@ -14,14 +14,14 @@ def load_from_excel(excel_file, sheet_name=None):
     if not Path(excel_file).exists():
         return pd.DataFrame()
     return pd.read_excel(excel_file, sheet_name=sheet_name)
-    
+
 
 def export_to_excel(
-    data,
-    file_path,
+    data: pd.DataFrame | dict[str, pd.DataFrame],
+    file_path: Path | str,
+    sheet_name="Sheet1"
 ):
     file_path = Path(file_path)
-
     file_path.parent.mkdir(
         parents=True,
         exist_ok=True,
@@ -29,69 +29,80 @@ def export_to_excel(
 
     try:
         if isinstance(data, pd.DataFrame):
-            data.to_excel(
-                file_path,
-                index=False,
-            )
+            data = {sheet_name: data}
 
-        elif isinstance(data, dict):
-            with pd.ExcelWriter(
-                file_path,
-                engine="openpyxl",
-            ) as writer:
-                for sheet_name, df in data.items():
-                    df.to_excel(
-                        writer,
-                        sheet_name=sheet_name,
-                        index=False,
-                    )
+        with pd.ExcelWriter(
+            file_path,
+            engine="openpyxl",
+        ) as writer:
+            for sheet_name, df in data.items():
+                df = format_dataframe(df)
 
-        else:
-            raise TypeError("data must be DataFrame or dict[str, DataFrame]")
+                df.to_excel(
+                    writer,
+                    sheet_name=sheet_name,
+                    index=False,
+                )
+
+                worksheet = writer.sheets[sheet_name]
+
+                format_worksheet(worksheet)
 
     except PermissionError:
         logger.exception(f"Excel file is open: {file_path}")
         raise
 
-    wb = load_workbook(file_path)
 
-    for ws in wb.worksheets:
-        for col in ws.iter_cols():
-            header = str(col[0].value)
+def format_worksheet(ws):
 
-            if header == "CompanyName":
-                ws.column_dimensions[col[0].column_letter].width = 30
-            elif header in ["Title","Reason", "TitleCN","ReasonCN", "Summary"]:
-                ws.column_dimensions[col[0].column_letter].width = 40
-            elif header == "Url":
-                ws.column_dimensions[col[0].column_letter].width = 70
-                for cell in col[1:]:
-                    if not cell.value:
-                        continue
-                    cell.hyperlink = str(cell.value)
-                    cell.style = "Hyperlink"
-            
-            for cell in col[1:]:
-                cell.alignment = Alignment(
-                    wrap_text=True,
-                    vertical="center",
-                )
-                if not isinstance(cell.value, float):
+    for column in ws.columns:
+        name = column[0].value
+
+        if name == "CompanyName":
+            width = 30
+
+        elif name in ["Title", "Reason", "TitleCN", "ReasonCN", "Summary"]:
+            width = 40
+
+        elif name == "URL":
+            width = 70
+            for cell in column[1:]:
+                if not cell.value:
                     continue
-                if "Ratio" in header:
+                cell.hyperlink = str(cell.value)
+                cell.style = "Hyperlink"
+
+        else:
+            width = max(len(str(name)), *(len(str(c.value)) for c in column[1:])) + 2
+
+        ws.column_dimensions[column[0].column_letter].width = width
+
+        for cell in column[1:]:
+            cell.alignment = Alignment(
+                wrap_text=True,
+                vertical="top",
+            )
+
+            if isinstance(cell.value, Number):
+                if "Ratio" in name:
                     cell.number_format = "0.00%"
                 else:
-                    cell.number_format = "0.000"
+                    cell.number_format = "0.###"
 
-    wb.save(file_path)
 
-    return file_path
+def format_dataframe(df):
+
+    df = df.copy()
+
+    if "Date" in df.columns:
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.strftime("%Y-%m-%d")
+
+    return df
 
 
 def check_output_files():
 
     files = []
-    
 
     for file_path in files:
         file_path = Path(file_path)

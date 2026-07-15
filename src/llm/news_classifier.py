@@ -5,7 +5,7 @@ from configs import CLASSIFIER_PROVIDER
 from context import ProjectContext
 from llm.llm_agent import LLMAgent
 from llm.prompts import build_news_classifier_prompt
-from utils.excel_utils import load_from_excel
+from utils.excel_utils import export_to_excel, load_from_excel
 from utils.llm_utils import calculate_batch_size
 
 
@@ -96,9 +96,9 @@ class NewsClassifier:
 
             result_df = result_df.drop_duplicates(subset=["CompanyName", "Title"])
 
-            result_df.to_excel(
-                context.paths.risk_news,
-                index=False,
+            export_to_excel(
+                data=result_df,
+                file_path=context.paths.risk_news,
                 sheet_name="RiskNews",
             )
 
@@ -145,7 +145,9 @@ class NewsClassifier:
 
         risk_news_df = self.classify_news(raw_news_df, context)
 
-        risk_news_df.to_excel(
-            context.paths.risk_news, index=False, sheet_name="RiskNews"
+        export_to_excel(
+            data=risk_news_df,
+            file_path=context.paths.risk_news, 
+            sheet_name="RiskNews"
         )
         return risk_news_df
