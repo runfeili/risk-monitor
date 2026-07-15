@@ -51,6 +51,7 @@ class NewsClassifier:
                     "Severity": item.get("severity"),
                     "Title": source_row["Title"],
                     "TitleCN": item.get("title_cn"),
+                    "Reason": item.get("reason"),
                     "ReasonCN": item.get("reason_cn"),
                     "Source": source_row["Source"],
                     "Url": source_row["Url"],

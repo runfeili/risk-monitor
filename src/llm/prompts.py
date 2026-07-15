@@ -81,7 +81,8 @@ Each item must include:
 - severity (High / Medium / Low)
 - title (original headline)
 - title_cn (Simplified Chinese translation)
-- reason_cn (concise credit-risk explanation in simplified Chinese)
+- reason (concise credit-risk explanation)
+- reason_cn (Simplified Chinese translation)
 
 ---
 
@@ -518,6 +519,7 @@ Otherwise:
     "Severity": "High | Medium | Low",
     "Title": "...",
     "Summary": "...",
+    "Reason": "...",
     "ReasonCN": "...",
     "Source": "...",
     "Url": "...",
@@ -534,11 +536,13 @@ Summary:
 - Must describe what happened, when possible.
 - Do not include judgement, risk assessment, or bank impact.
 
-ReasonCN:
+Reason:
 - Explain why the event matters to a commercial bank lender.
 - Focus on potential implications for credit risk, repayment ability, business operation, financial condition, reputation, legal compliance, or relationship management.
 - Do not repeat the Summary.
-- Provide the Reason in Chinese.
+
+ReasonCN:
+- Translate the Reason into Simplified Chinese.
 - Do not add new information or interpretation.
 
 Important:
