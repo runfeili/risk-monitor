@@ -56,7 +56,7 @@ def export_to_excel(
 def format_worksheet(ws):
     for column in ws.columns:
         name = column[0].value
-        wrap = name != "URL"
+        wrap = name != "Url"
 
         for cell in column[1:]:
             cell.alignment = Alignment(
@@ -70,7 +70,7 @@ def format_worksheet(ws):
                 else:
                     cell.number_format = "0.###"
 
-            if name == "URL" and cell.value:
+            if name == "Url" and cell.value:
                 cell.hyperlink = str(cell.value)
                 cell.style = "Hyperlink"
 
@@ -80,11 +80,11 @@ def format_worksheet(ws):
         elif name in ["Title", "Reason", "TitleCN", "ReasonCN", "Summary"]:
             width = 40
 
-        elif name == "URL":
+        elif name == "Url":
             width = 70
 
         else:
-            width = max(len(str(name)), *(len(str(c.value)) for c in column[1:])) + 2
+            width = 10
 
         ws.column_dimensions[column[0].column_letter].width = width
 
