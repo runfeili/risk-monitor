@@ -1,18 +1,88 @@
-# RiskMonitor
+# Risk Monitor
 
-贷后风险智能监控系统
+> 基于 Bloomberg、Google News 和 Gemini 的贷后风险监控系统。
 
-基于多源数据融合与大语言模型（LLM）的企业风险监测平台，用于自动化识别企业客户潜在风险事件，并生成结构化风险报告。
 
-系统通过整合 Bloomberg 市场信息、企业新闻数据以及 LLM 风险分析能力，实现：
-
-- 企业风险指标计算
-- 客户风险排序
-- 新闻自动采集
-- 风险事件识别
-- 自动化 Excel 报告生成
-
----
-
-## 系统架构
+## 系统流程
 <img src="assets/pipeline.svg" width="900">
+
+
+## 项目结构
+
+```text
+risk-monitor/
+│
+├── input/             # 输入文件
+├── output/            # 输出结果
+├── logs/              # 日志
+│
+├── src/
+│   ├── main.py        # 主程序入口
+│   ├── configs.py     # 配置文件
+│   ├── context.py     # 数据结构设计
+│   │
+│   ├── metrics/       # Bloomberg 指标计算
+│   ├── spiders/       # Google News 新闻爬取
+│   ├── llm/           # 大模型相关模块
+│   │ 
+│   └── utils/         # 工具函数
+│
+├── requirements.txt
+└── README.md
+```
+
+## 配置与运行
+
+### 环境要求
+- Python >= 3.11
+- Bloomberg Terminal
+- Gemini API Key
+
+### 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+### 配置 API Key
+
+项目使用 `.env` 管理 Gemini API Keys。
+
+示例：
+
+```env
+GEMINI_API_KEYS=key1,key2,key3
+```
+
+支持多个 Key 自动轮换。
+
+### 修改运行参数
+
+主要配置位于：
+
+```text
+src/configs.py
+```
+
+### 使用方法
+输入企业名单：
+
+```text
+input/company_list.xlsx
+```
+
+运行主程序：
+
+```bash
+python src/main.py
+```
+
+
+
+程序运行结束后将在`outout/`生成结果。
+
+运行日志位于：
+
+```text
+logs/
+```
