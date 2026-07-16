@@ -15,7 +15,7 @@ from configs import (
     PERIODICITY,
     RUN_LLM_NEWS_SEARCH,
     RUN_NEWS_CLASSIFIER,
-    INPUT_FILE
+    INPUT_FILE,
 )
 from utils.pipeline_utils import build_search_company_df, build_spider_company_df
 
@@ -58,22 +58,24 @@ def main():
         news_classifier = NewsClassifier()
         news_searcher = NewsSearcher()
 
-        logger.info(f"Analyzing data from {context.period.analysis_start_date} to {context.period.analysis_end_date}.")
+        logger.info(
+            f"Analyzing data from {context.period.analysis_start_date} to {context.period.analysis_end_date}."
+        )
         context.news_metric_df = bbg.run_news(context=context)
         context.financial_metric_df = bbg.run_financial(context=context)
-        
+
         context.spider_company_df = build_spider_company_df(context)
         context.raw_news_df = news_spider.run(
             context=context,
             company_df=context.spider_company_df,
         )
-        
+
         context.risk_news_df = news_classifier.run(
             context=context,
             raw_news_df=context.raw_news_df,
-            force_refresh=RUN_NEWS_CLASSIFIER
+            force_refresh=RUN_NEWS_CLASSIFIER,
         )
-        
+
         context.search_company_df = build_search_company_df(context)
         context.llm_news_df = news_searcher.run(
             company_df=context.search_company_df,

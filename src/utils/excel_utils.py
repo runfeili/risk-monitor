@@ -19,7 +19,7 @@ def load_from_excel(excel_file, sheet_name=None):
 def export_to_excel(
     data: pd.DataFrame | dict[str, pd.DataFrame],
     file_path: Path | str,
-    sheet_name="Sheet1"
+    sheet_name="Sheet1",
 ):
     file_path = Path(file_path)
     file_path.parent.mkdir(
@@ -54,9 +54,25 @@ def export_to_excel(
 
 
 def format_worksheet(ws):
-
     for column in ws.columns:
         name = column[0].value
+        wrap = name != "URL"
+
+        for cell in column[1:]:
+            cell.alignment = Alignment(
+                wrap_text=wrap,
+                vertical="top",
+            )
+
+            if isinstance(cell.value, Number):
+                if "Ratio" in name:
+                    cell.number_format = "0.00%"
+                else:
+                    cell.number_format = "0.###"
+
+            if name == "URL" and cell.value:
+                cell.hyperlink = str(cell.value)
+                cell.style = "Hyperlink"
 
         if name == "CompanyName":
             width = 30
@@ -66,28 +82,11 @@ def format_worksheet(ws):
 
         elif name == "URL":
             width = 70
-            for cell in column[1:]:
-                if not cell.value:
-                    continue
-                cell.hyperlink = str(cell.value)
-                cell.style = "Hyperlink"
 
         else:
             width = max(len(str(name)), *(len(str(c.value)) for c in column[1:])) + 2
 
         ws.column_dimensions[column[0].column_letter].width = width
-
-        for cell in column[1:]:
-            cell.alignment = Alignment(
-                wrap_text=True,
-                vertical="top",
-            )
-
-            if isinstance(cell.value, Number):
-                if "Ratio" in name:
-                    cell.number_format = "0.00%"
-                else:
-                    cell.number_format = "0.###"
 
 
 def format_dataframe(df):
@@ -98,28 +97,3 @@ def format_dataframe(df):
         df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.strftime("%Y-%m-%d")
 
     return df
-
-
-def check_output_files():
-
-    files = []
-
-    for file_path in files:
-        file_path = Path(file_path)
-
-        file_path.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        if not file_path.exists():
-            continue
-
-        try:
-            os.rename(
-                file_path,
-                file_path,
-            )
-
-        except PermissionError:
-            raise PermissionError(f"Please close Excel file: {file_path}")
