@@ -111,11 +111,9 @@ class BloombergClient:
 
                 if df.empty:
                     missing_tickers.append(ticker)
-                    logger.debug(f"{ticker}: no data returned.")
 
                 else:
                     df = df.sort_values("date").reset_index(drop=True)
-                    logger.debug(f"{ticker}: {len(df)} rows loaded.")
 
                 results[ticker] = df
 
@@ -135,10 +133,6 @@ class BloombergClient:
 
         if missing_tickers:
             logger.warning(f"Missing data for {len(missing_tickers)} tickers.")
-            logger.debug(
-                "Missing tickers: ",
-                "\n".join(f"  - {ticker}" for ticker in missing_tickers),
-            )
 
         return results
 

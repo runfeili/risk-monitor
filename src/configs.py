@@ -58,5 +58,3 @@ FINANCIAL_FIELDS = [
 
 INPUT_DIR = Path("input")
 INPUT_FILE = INPUT_DIR / "classified_company_list.xlsx"
-
-DEBUG_MODE = False

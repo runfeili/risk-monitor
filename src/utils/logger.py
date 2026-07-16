@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from configs import DEBUG_MODE
 
 
 def setup_logger():
@@ -13,7 +12,7 @@ def setup_logger():
     log_file = log_dir / f"risk_monitor_{datetime.today():%Y%m%d}.log"
 
     logging.basicConfig(
-        level=(logging.DEBUG if DEBUG_MODE else logging.INFO),
+        level=logging.INFO,
         format=("%(asctime)s | %(levelname)-7s | %(message)s"),
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[

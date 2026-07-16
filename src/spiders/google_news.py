@@ -37,11 +37,9 @@ class GoogleNewsSpider:
         self,
         company_name: str,
     ):
-        logger.debug(f"Fetching news: {company_name}")
 
         try:
             news = self._google_news.get_news(company_name)
-            logger.debug(f"{company_name}: {len(news)} news found")
 
             if news is None:
                 return []
