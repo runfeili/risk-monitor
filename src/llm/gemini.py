@@ -33,63 +33,35 @@ class GeminiProvider:
         max_retry=3,
     ):
 
-        last_exception = None
+        for retry in range(max_retry + 1):
+            try:
+                return func()
 
-        while True:
-            self._set_api_key(self.key_manager.current)
+            except Exception as exc:
+                last_exception = exc
 
-            for retry in range(max_retry + 1):
-                try:
-                    return func()
+                if self._is_key_error(exc):
+                    raise
 
-                except Exception as exc:
-                    last_exception = exc
+                if self._is_retryable_error(exc):
+                    if retry < max_retry:
+                        wait = min(60, 2**retry)
 
-                    if self._is_key_error(exc):
                         logger.warning(
-                            "API key exhausted (%d/%d). Reason=%s",
-                            self.key_manager.current_index + 1,
-                            self.key_manager.total,
+                            "Temporary error, retry %d/%d after %ds. Model=%s, Error=%s",
+                            retry + 1,
+                            max_retry,
+                            wait,
+                            self.current_model,
                             self._error_summary(exc),
                         )
-                        break
 
-                    elif self._is_retryable_error(exc):
-                        if retry < max_retry:
-                            wait = min(60, 2**retry)
+                        time.sleep(wait)
+                        continue
 
-                            logger.warning(
-                                "Temporary error, retry %d/%d after %ds. Model=%s, Error=%s",
-                                retry + 1,
-                                max_retry,
-                                wait,
-                                self.current_model,
-                                self._error_summary(exc),
-                            )
+                raise
 
-                            time.sleep(wait)
-
-                            continue
-
-                        else:
-                            break
-
-                    else:
-                        raise
-
-            if self.key_manager.rotate():
-                logger.info(
-                    "Switching API key to %d/%d",
-                    self.key_manager.current_index + 1,
-                    self.key_manager.total,
-                )
-                continue
-            else:
-                logger.warning(
-                    "All API keys exhausted for model [%s].",
-                    self.current_model,
-                )
-                raise last_exception
+        raise last_exception
 
     def generate(
         self,
@@ -106,55 +78,82 @@ class GeminiProvider:
         if use_search:
             config.tools = [self.google_search_tool]
 
+        self.key_manager.reset()
+
         last_exception = None
 
         while True:
-            try:
-                return self._run_with_retry(
-                    lambda: (
-                        self.client.models.generate_content(
-                            model=self.current_model,
-                            contents=prompt,
-                            config=config,
-                        ).text
+            self._set_api_key(self.key_manager.current)
+
+            self.model_index = 0
+
+            while True:
+                try:
+                    return self._run_with_retry(
+                        lambda: (
+                            self.client.models.generate_content(
+                                model=self.current_model,
+                                contents=prompt,
+                                config=config,
+                            ).text
+                        )
                     )
-                )
 
-            except Exception as exc:
-                last_exception = exc
+                except Exception as exc:
+                    last_exception = exc
 
-                logger.warning(
-                    "Gemini model [%s] failed: %s",
-                    self.current_model,
-                    self._error_summary(exc),
-                )
-
-                if self.rotate_model():
-                    logger.info(
-                        "Switching Gemini model from [%s] to [%s].",
-                        self.models[self.model_index - 1],
+                    logger.warning(
+                        "Gemini model [%s] failed: %s",
                         self.current_model,
+                        self._error_summary(exc),
                     )
-                    continue
 
-                logger.error(
-                    "All Gemini models failed. Last error: %s",
-                    self._error_summary(last_exception),
-                )
+                    if self._is_key_error(exc):
+                        logger.warning(
+                            "API key exhausted (%d/%d).",
+                            self.key_manager.current_index + 1,
+                            self.key_manager.total,
+                        )
+                        break
 
-                raise last_exception
+                    if self.rotate_model():
+                        logger.info(
+                            "Switching model to [%s].",
+                            self.current_model,
+                        )
+                        continue
+
+                    logger.warning(
+                        "All models failed for current API key (%d/%d).",
+                        self.key_manager.current_index + 1,
+                        self.key_manager.total,
+                    )
+                    break
+
+            if not self.key_manager.rotate():
+                break
+
+            logger.info(
+                "Switching API key to %d/%d",
+                self.key_manager.current_index + 1,
+                self.key_manager.total,
+            )
+
+        logger.error(
+            "All Gemini API keys and models failed. Last error: %s",
+            self._error_summary(last_exception),
+        )
+        raise last_exception
 
     @property
     def current_model(self) -> str:
         return self.models[self.model_index]
 
     def rotate_model(self) -> bool:
-        self.model_index += 1
-
-        if self.model_index >= len(self.models):
-            self.model_index = 0
+        if self.model_index + 1 >= len(self.models):
             return False
 
+        self.model_index += 1
         return True
 
     @staticmethod
@@ -188,7 +187,6 @@ class GeminiProvider:
         msg = str(exc).lower()
 
         keywords = (
-            "429",
             "500",
             "502",
             "503",
