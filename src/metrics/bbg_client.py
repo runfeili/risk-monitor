@@ -55,8 +55,8 @@ class BloombergClient:
         for field in fields:
             request.append("fields", field)
 
-        request.set("startDate", start_date.strftime("%Y-%m-%d"))
-        request.set("endDate", end_date.strftime("%Y-%m-%d"))
+        request.set("startDate", start_date.strftime("%Y%m%d"))
+        request.set("endDate", end_date.strftime("%Y%m%d"))
 
         # Set periodicity to DAILY to get daily data
         request.set("periodicitySelection", "DAILY")
