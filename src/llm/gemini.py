@@ -14,15 +14,18 @@ logger = logging.getLogger(__name__)
 
 class GeminiProvider:
     def __init__(self, models=None):
-        self.models = models or GEMINI_MODELS
 
+        self.total_prompt_tokens = 0
+        self.total_thought_tokens = 0
+        self.total_tokens = 0
+
+        self.models = models or GEMINI_MODELS
         self.model_index = 0
 
         self.key_manager = APIKeyManager(GEMINI_API_KEYS)
+        self._set_api_key(self.key_manager.current)
 
         self.google_search_tool = Tool(google_search=GoogleSearch())
-
-        self._set_api_key(self.key_manager.current)
 
     def _set_api_key(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
@@ -89,15 +92,28 @@ class GeminiProvider:
 
             while True:
                 try:
-                    return self._run_with_retry(
-                        lambda: (
-                            self.client.models.generate_content(
-                                model=self.current_model,
-                                contents=prompt,
-                                config=config,
-                            ).text
+                    response = self._run_with_retry(
+                        lambda: self.client.models.generate_content(
+                            model=self.current_model,
+                            contents=prompt,
+                            config=config,
                         )
                     )
+
+                    usage = getattr(response, "usage_metadata", None)
+                    if usage:
+                        self.total_prompt_tokens += usage.prompt_token_count
+                        self.total_thought_tokens += usage.thoughts_token_count
+                        self.total_tokens += usage.total_token_count
+
+                        logger.info(
+                            "Gemini usage | input=%d output=%d total=%d",
+                            usage.prompt_token_count,
+                            usage.thoughts_token_count,
+                            usage.total_token_count,
+                        )
+
+                    return response.text
 
                 except Exception as exc:
                     last_exception = exc
@@ -110,11 +126,12 @@ class GeminiProvider:
 
                     if self._is_key_error(exc):
                         logger.warning(
-                            "API key exhausted (%d/%d).",
+                            "API key (%d/%d) exhausted for current model [%s].",
                             self.key_manager.current_index + 1,
                             self.key_manager.total,
+                            self.current_model
                         )
-                        break
+                        # break
 
                     if self.rotate_model():
                         logger.info(
