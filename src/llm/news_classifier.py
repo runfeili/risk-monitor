@@ -16,6 +16,7 @@ class NewsClassifier:
     def __init__(self):
         self.agent = LLMAgent(
             provider=CLASSIFIER_PROVIDER,
+            usage_tag="classifier"
         )
 
     def classify_batch(
@@ -45,7 +46,6 @@ class NewsClassifier:
             rows.append(
                 {
                     "CompanyName": source_row["CompanyName"],
-                    "BloombergAvailable": source_row["BloombergAvailable"],
                     "Date": source_row["Date"],
                     "Category": item.get("category"),
                     "Severity": item.get("severity"),
@@ -108,7 +108,7 @@ class NewsClassifier:
             "Medium": 1,
             "Low": 2,
         }
-        # result_df["Date"] = pd.to_datetime(result_df["Date"])
+
         result_df = (
             result_df.assign(
                 SeverityOrder=result_df["Severity"].map(severity_order)
@@ -129,6 +129,13 @@ class NewsClassifier:
         )
         logger.info(f"Severity: {severity_counts}")
         logger.info(f"Category: {category_counts}")
+
+        export_to_excel(
+            data=result_df,
+            file_path=context.paths.risk_news,
+            sheet_name="RiskNews",
+        )
+
         return result_df
 
     def run(
@@ -146,9 +153,15 @@ class NewsClassifier:
 
         risk_news_df = self.classify_news(raw_news_df, context)
 
-        export_to_excel(
-            data=risk_news_df,
-            file_path=context.paths.risk_news, 
-            sheet_name="RiskNews"
+        usage_stats = self.agent.provider.usage_stats["classifier"]
+        logger.info("Total Gemini usage for classifier:")
+        logger.info("%d requests | input=%d output=%d think=%d tool=%d total=%d", 
+                    usage_stats["requests"], 
+                    usage_stats["prompt_tokens"],
+                    usage_stats["output_tokens"],
+                    usage_stats["thoughts_tokens"],
+                    usage_stats["tool_tokens"],
+                    usage_stats["total_tokens"],
         )
+        
         return risk_news_df

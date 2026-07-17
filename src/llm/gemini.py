@@ -12,12 +12,33 @@ from llm.api_key import APIKeyManager
 logger = logging.getLogger(__name__)
 
 
+class EmptyResponseError(RuntimeError):
+    """Gemini returned an empty response text."""
+
+    pass
+
+
 class GeminiProvider:
     def __init__(self, models=None):
 
-        self.total_prompt_tokens = 0
-        self.total_thought_tokens = 0
-        self.total_tokens = 0
+        self.usage_stats = {
+            "searcher": {
+                "requests": 0,
+                "prompt_tokens": 0,
+                "output_tokens": 0,
+                "thoughts_tokens": 0,
+                "tool_tokens": 0,
+                "total_tokens": 0,
+            },
+            "classifier": {
+                "requests": 0,
+                "prompt_tokens": 0,
+                "output_tokens": 0,
+                "thoughts_tokens": 0,
+                "tool_tokens": 0,
+                "total_tokens": 0,
+            },
+        }
 
         self.models = models or GEMINI_MODELS
         self.model_index = 0
@@ -71,6 +92,7 @@ class GeminiProvider:
         prompt: str,
         *,
         use_search: bool = False,
+        usage_tag: str = "default",
         temperature: float = 0,
     ) -> str:
 
@@ -93,24 +115,24 @@ class GeminiProvider:
             while True:
                 try:
                     response = self._run_with_retry(
-                        lambda: self.client.models.generate_content(
-                            model=self.current_model,
-                            contents=prompt,
-                            config=config,
-                        )
+                        lambda: self._generate_once(prompt, config)
                     )
 
                     usage = getattr(response, "usage_metadata", None)
                     if usage:
-                        self.total_prompt_tokens += usage.prompt_token_count
-                        self.total_thought_tokens += usage.thoughts_token_count
-                        self.total_tokens += usage.total_token_count
+                        stats = self.usage_stats[usage_tag]
+                        stats["requests"] += 1
+                        stats["prompt_tokens"] += usage.prompt_token_count or 0
+                        stats["output_tokens"] += usage.candidates_token_count or 0
+                        stats["thoughts_tokens"] += usage.thoughts_token_count or 0
+                        stats["tool_tokens"] += usage.tool_use_prompt_token_count or 0
+                        stats["total_tokens"] += usage.total_token_count or 0
 
                         logger.info(
-                            "Gemini usage | input=%d output=%d total=%d",
-                            usage.prompt_token_count,
-                            usage.thoughts_token_count,
-                            usage.total_token_count,
+                            "Gemini usage | input=%d think=%d total=%d",
+                            usage.prompt_token_count or 0,
+                            usage.thoughts_token_count or 0,
+                            usage.total_token_count or 0,
                         )
 
                     return response.text
@@ -129,7 +151,7 @@ class GeminiProvider:
                             "API key (%d/%d) exhausted for current model [%s].",
                             self.key_manager.current_index + 1,
                             self.key_manager.total,
-                            self.current_model
+                            self.current_model,
                         )
                         # break
 
@@ -161,6 +183,20 @@ class GeminiProvider:
             self._error_summary(last_exception),
         )
         raise last_exception
+
+    def _generate_once(self, prompt, config):
+        response = self.client.models.generate_content(
+            model=self.current_model,
+            contents=prompt,
+            config=config,
+        )
+
+        if not response.text:
+            logger.warning("Gemini returned empty response.")
+            logger.error("Response: %r", response)
+            raise EmptyResponseError()
+
+        return response
 
     @property
     def current_model(self) -> str:
@@ -201,6 +237,9 @@ class GeminiProvider:
 
     @staticmethod
     def _is_retryable_error(exc: Exception) -> bool:
+        if isinstance(exc, EmptyResponseError):
+            return True
+
         msg = str(exc).lower()
 
         keywords = (

@@ -1,13 +1,17 @@
 import json
-
+import logging
 from llm.gemini import GeminiProvider
+
+logger = logging.getLogger(__name__)
 
 
 class LLMAgent:
     def __init__(
         self,
         provider: str,
+        usage_tag:str,
     ):
+        self.usage_tag = usage_tag
         if provider == "gemini":
             self.provider = GeminiProvider()
 
@@ -25,6 +29,7 @@ class LLMAgent:
         return self.provider.generate(
             prompt,
             use_search=use_search,
+            usage_tag=self.usage_tag,
             temperature=temperature,
         )
 
@@ -39,7 +44,12 @@ class LLMAgent:
             **kwargs,
         )
 
-        return self.parse_json(text)
+        try:
+            return self.parse_json(text)
+        except Exception as e:
+            logger.error(f"JSON parsing failed. {e}")
+            logger.error("Original response:\n%s", text)
+            raise
 
     @staticmethod
     def parse_json(text: str):

@@ -14,6 +14,7 @@ class NewsSearcher:
     def __init__(self):
         self.agent = LLMAgent(
             provider=SEARCH_PROVIDER,
+            usage_tag="searcher"
         )
 
     def search_news(
@@ -130,6 +131,17 @@ class NewsSearcher:
             start_date=context.period.analysis_start_date,
             end_date=context.period.analysis_end_date,
             output_file=context.paths.llm_news,
+        )
+
+        usage_stats = self.agent.provider.usage_stats["searcher"]
+        logger.info("Total Gemini usage for searcher:")
+        logger.info("%d requests | input=%d output=%d think=%d tool=%d total=%d", 
+                    usage_stats["requests"], 
+                    usage_stats["prompt_tokens"],
+                    usage_stats["output_tokens"],
+                    usage_stats["thoughts_tokens"],
+                    usage_stats["tool_tokens"],
+                    usage_stats["total_tokens"],
         )
 
         return llm_news_df
