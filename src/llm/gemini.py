@@ -129,9 +129,11 @@ class GeminiProvider:
                         stats["total_tokens"] += usage.total_token_count or 0
 
                         logger.info(
-                            "Gemini usage | input=%d think=%d total=%d",
+                            "Gemini usage | input=%d output=%d think=%d tool=%d total=%d",
                             usage.prompt_token_count or 0,
+                            usage.candidates_token_count or 0,
                             usage.thoughts_token_count or 0,
+                            usage.tool_use_prompt_token_count or 0,
                             usage.total_token_count or 0,
                         )
 
