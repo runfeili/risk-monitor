@@ -1,5 +1,5 @@
 import pandas as pd
-from configs import TOP_N
+from config import TOP_N
 from context import ProjectContext
 
 

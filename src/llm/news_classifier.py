@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 from tqdm import tqdm
-from configs import CLASSIFIER_PROVIDER
+from config import CLASSIFIER_PROVIDER
 from context import ProjectContext
 from llm.llm_agent import LLMAgent
 from llm.prompts import build_news_classifier_prompt

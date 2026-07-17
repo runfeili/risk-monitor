@@ -6,7 +6,7 @@ from google.genai.types import (
     GoogleSearch,
     Tool,
 )
-from configs import GEMINI_MODELS, GEMINI_API_KEYS
+from config import GEMINI_MODELS, GEMINI_API_KEYS
 from llm.api_key import APIKeyManager
 
 logger = logging.getLogger(__name__)

@@ -9,7 +9,7 @@ from utils.path_utils import build_file_paths
 from utils.excel_utils import export_to_excel, load_from_excel
 from utils.logger import setup_logger
 from spiders.news_spider import NewsSpider
-from configs import (
+from config import (
     ANALYSIS_LOOKBACK,
     BASELINE_LOOKBACK,
     PERIODICITY,

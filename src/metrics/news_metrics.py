@@ -1,6 +1,6 @@
 import pandas as pd
 from metrics.risk_score import calc_risk_score
-from configs import PERIODICITY
+from config import PERIODICITY
 
 
 def calc_news_metrics(

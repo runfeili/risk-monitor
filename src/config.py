@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-RUN_NEWS_CLASSIFIER = True
+RUN_NEWS_CLASSIFIER = False
 RUN_LLM_NEWS_SEARCH = True
 
 PERIODICITY = "WEEKLY"
@@ -21,8 +21,6 @@ CLASSIFIER_PROVIDER = "gemini"
 GEMINI_MODELS = [
     "gemini-3.5-flash",
     "gemini-2.5-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-2.5-flash-lite",
 ]
 
 GEMINI_API_KEYS = [
@@ -30,6 +28,12 @@ GEMINI_API_KEYS = [
     for key in os.getenv("GEMINI_API_KEYS", "").split(",")
     if key.strip()
 ]
+
+PROMPT_CONFIG = {
+    "news_classifier": "news_classifier_v1.txt",
+    "news_searcher": "news_searcher_v1.txt",
+    "news_summarizer": "news_summarizer_v1.txt",
+}
 
 TOP_N = 20
 
@@ -53,7 +57,6 @@ FINANCIAL_FIELDS = [
     "NET_INCOME",
     "EBITDA",
     "BS_TOT_ASSET",
-    "BS_TOT_DEBT",
 ]
 
 INPUT_DIR = Path("input")

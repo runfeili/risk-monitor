@@ -1,6 +1,6 @@
 import math
 
-from configs import (
+from config import (
     LLM_MAX_CALLS,
     LLM_MIN_BATCH_SIZE,
     LLM_MAX_BATCH_SIZE,

@@ -1,5 +1,5 @@
 from datetime import datetime
-from configs import NEWS_FIELDS, FINANCIAL_FIELDS
+from config import NEWS_FIELDS, FINANCIAL_FIELDS
 from context import ProjectContext
 from metrics.news_metrics import calc_news_metrics
 from metrics.financial_metrics import calc_financial_metrics
