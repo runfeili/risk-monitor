@@ -518,7 +518,7 @@ Otherwise:
     "Category": "...",
     "Severity": "High | Medium | Low",
     "Title": "...",
-    "Summary": "...",
+    "TitleCN": "...",
     "Reason": "...",
     "ReasonCN": "...",
     "Source": "...",
@@ -531,19 +531,23 @@ All fields are mandatory.
 - Do not return null, empty string, "-", "N/A", or omit any field.
 - If the original information is insufficient, infer a concise but reasonable value based on the available news content. Do not leave any field blank.
 
-Summary:
-- Summarize the factual event in 1-2 sentences.
-- Must describe what happened, when possible.
-- Do not include judgement, risk assessment, or bank impact.
+Category:
+- Choose ONE only
+
+TitleCN:
+- Translate the Title into Simplified Chinese.
 
 Reason:
-- Explain why the event matters to a commercial bank lender.
+- Concisely explain why the event matters to a commercial bank lender.
 - Focus on potential implications for credit risk, repayment ability, business operation, financial condition, reputation, legal compliance, or relationship management.
-- Do not repeat the Summary.
 
 ReasonCN:
 - Translate the Reason into Simplified Chinese.
 - Do not add new information or interpretation.
+
+Url:
+- Use ONLY URLs that appear in the Google Search results.
+- NEVER generate or infer a URL.
 
 Important:
 - Always include CompanyName in every output item.
