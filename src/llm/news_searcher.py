@@ -83,10 +83,38 @@ class NewsSearcher:
                     sheet_name="LlmNews",
                 )
 
+        severity_order = {
+            "High": 0,
+            "Medium": 1,
+            "Low": 2,
+        }
+
+        result_df = (
+            result_df.assign(
+                SeverityOrder=result_df["Severity"].map(severity_order)
+            )
+            .sort_values(
+                by=["SeverityOrder", "Date"],
+                ascending=[True, False],
+            )
+            .drop(columns="SeverityOrder")
+            .reset_index(drop=True)
+        )
+        severity_counts = result_df["Severity"].value_counts().to_dict()
+        category_counts = result_df["Category"].value_counts().to_dict()
+
+        export_to_excel(
+            data=result_df,
+            file_path=output_file,
+            sheet_name="LlmNews",
+        )
+
         logger.info(
             "LLM news search completed. Total records: %d",
             len(result_df),
         )
+        logger.info(f"Severity: {severity_counts}")
+        logger.info(f"Category: {category_counts}")
 
         return result_df
 
