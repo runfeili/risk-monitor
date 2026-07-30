@@ -102,7 +102,7 @@ News Filtering Rules
 
 Search ONLY news published between:
 
-{start_date} and {end_date}
+$start_date and $end_date
 
 Read the article content before making a judgement.
 
@@ -122,14 +122,14 @@ Include
 
 Include events such as:
 
-Credit:
+Credit Risk:
 - default or missed payment
 - debt restructuring
 - covenant breach
 - credit rating downgrade
 - financing difficulty
 
-Financial:
+Financial Risk:
 - significant earnings deterioration
 - profit warning
 - large losses
@@ -137,13 +137,13 @@ Financial:
 - major impairment
 - financing pressure
 
-Regulatory and Legal:
+Regulatory and Legal Risk:
 - government investigation
 - regulatory penalty
 - litigation with material financial impact
 - fraud or corruption investigation
 
-Operational:
+Operational Risk:
 - major production disruption
 - factory closure
 - serious accident
@@ -151,14 +151,14 @@ Operational:
 - cybersecurity incident
 - major supply chain disruption
 
-Strategic:
+Strategic Risk:
 - failed acquisition
 - major asset disposal
 - business restructuring
 - major customer loss
 - project cancellation
 
-Management:
+Management Risk:
 - CEO/CFO departure under concerning circumstances
 - governance problems
 - misconduct
@@ -207,11 +207,9 @@ Output Format
 
 Return JSON only.
 
-If no material negative or risk-related news exists during the period, return:
+If no material negative or risk-related news exists during the period, return an empty JSON array.
 
-[]
-
-Otherwise:
+Otherwise, return ONLY ONE valid JSON array.
 
 [
   {{
@@ -224,7 +222,7 @@ Otherwise:
     "Reason": "...",
     "ReasonCN": "...",
     "Source": "...",
-    "Url": "...",
+    "Url": "..."
   }}
 ]
 
@@ -256,3 +254,25 @@ Important:
 - Always include CompanyName in every output item.
 - Ensure each news item belongs to the correct company.
 - All JSON fields must be present and populated.
+
+Before producing the final answer, verify:
+
+1. Every returned news item is materially negative.
+2. No positive or neutral news is included.
+3. Every Reason explains a negative credit implication.
+4. If any item fails these checks, remove it.
+
+Final output rule (highest priority):
+Your response is consumed directly by a JSON parser.
+Therefore the response MUST contain ONLY ONE JSON array.
+Never output:
+- explanations
+- analysis
+- reasoning
+- verification results
+- rejection reasons
+- company exclusion notes
+
+If there are zero qualifying news items,
+return exactly:
+[]
