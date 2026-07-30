@@ -1,7 +1,6 @@
 import logging
 import pandas as pd
 from tqdm import tqdm
-from config import SEARCH_PROVIDER
 from context import ProjectContext
 from llm.llm_agent import LLMAgent
 from llm.prompts import build_news_search_prompt
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 class NewsSearcher:
     def __init__(self):
         self.agent = LLMAgent(
-            provider=SEARCH_PROVIDER,
+            provider="gemini",
             usage_tag="searcher"
         )
 
@@ -162,7 +161,7 @@ class NewsSearcher:
         )
 
         usage_stats = self.agent.provider.usage_stats["searcher"]
-        logger.info("Total Gemini usage for searcher:")
+        logger.info("Gemini usage for searcher:")
         logger.info("%d requests | input=%d output=%d think=%d tool=%d total=%d", 
                     usage_stats["requests"], 
                     usage_stats["prompt_tokens"],

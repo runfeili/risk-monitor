@@ -1,7 +1,6 @@
 import logging
 import pandas as pd
 from tqdm import tqdm
-from config import CLASSIFIER_PROVIDER
 from context import ProjectContext
 from llm.llm_agent import LLMAgent
 from llm.prompts import build_news_classifier_prompt
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 class NewsClassifier:
     def __init__(self):
         self.agent = LLMAgent(
-            provider=CLASSIFIER_PROVIDER,
+            provider="gemini",
             usage_tag="classifier"
         )
 
@@ -154,7 +153,7 @@ class NewsClassifier:
         risk_news_df = self.classify_news(raw_news_df, context)
 
         usage_stats = self.agent.provider.usage_stats["classifier"]
-        logger.info("Total Gemini usage for classifier:")
+        logger.info("Gemini usage for classifier:")
         logger.info("%d requests | input=%d output=%d think=%d tool=%d total=%d", 
                     usage_stats["requests"], 
                     usage_stats["prompt_tokens"],
