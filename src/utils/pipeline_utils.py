@@ -4,10 +4,6 @@ from context import ProjectContext
 
 
 def build_spider_company_df(context: ProjectContext):
-    """
-    Build a DataFrame of companies to be crawled by the news-spider.
-    This includes both TOP_N Bloomberg-available and non-Bloomberg-available companies.
-    """
     bbg_df = context.news_metric_df.head(TOP_N)
     nonbbg_df = context.nonbbg_companies_df
 
@@ -18,16 +14,6 @@ def build_spider_company_df(context: ProjectContext):
 
 
 def build_search_company_df(context: ProjectContext):
-    """
-    Build a DataFrame of companies to be searched by the news-searcher.
-
-    Includes:
-    - TOP_N Bloomberg-available companies
-    - Non-Bloomberg companies with raw news
-
-    Excludes:
-    - Companies already identified in risk news
-    """
 
     # Bloomberg TOP_N companies
     bbg_df = context.news_metric_df.head(TOP_N)

@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 class EmptyResponseError(RuntimeError):
     """Gemini returned an empty response text."""
-
     pass
 
 
@@ -67,21 +66,20 @@ class GeminiProvider:
                 if self._is_key_error(exc):
                     raise
 
-                if self._is_retryable_error(exc):
-                    if retry < max_retry:
-                        wait = min(60, 2**retry)
+                if self._is_retryable_error(exc) and retry < max_retry:
+                    wait = min(60, 2**retry)
 
-                        logger.warning(
-                            "Temporary error, retry %d/%d after %ds. Model=%s, Error=%s",
-                            retry + 1,
-                            max_retry,
-                            wait,
-                            self.current_model,
-                            self._error_summary(exc),
-                        )
+                    logger.warning(
+                        "Temporary error, retry %d/%d after %ds. Model=%s, Error=%s",
+                        retry + 1,
+                        max_retry,
+                        wait,
+                        self.current_model,
+                        self._error_summary(exc),
+                    )
 
-                        time.sleep(wait)
-                        continue
+                    time.sleep(wait)
+                    continue
 
                 raise
 

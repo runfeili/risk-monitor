@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-RUN_NEWS_CLASSIFIER = False
+RUN_NEWS_CLASSIFIER = True
 RUN_LLM_NEWS_SEARCH = True
 
 PERIODICITY = "WEEKLY"

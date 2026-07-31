@@ -1,5 +1,4 @@
 import pandas as pd
-from metrics.risk_score import calc_risk_score
 from config import PERIODICITY
 
 
@@ -75,7 +74,6 @@ def calc_news_metrics(
     return results_df
 
 
-
 def get_analysis_metrics(analysis_df: pd.DataFrame):
     analysis_df = analysis_df.fillna(0)
 
@@ -135,3 +133,27 @@ def get_baseline_metrics(
         "baseline_news_count": avg_period_news,
         "baseline_neg_count": avg_period_neg,
     }
+
+
+def calc_risk_score(row):
+
+    neg_spike_score = min(
+        row["NegSpike"] / 5 * 100,
+        100,
+    )
+
+    neg_ratio_score = row["NegRatio"] * 100
+
+    news_spike_score = min(
+        row["VolSpike"] / 5 * 100,
+        100,
+    )
+
+    sentiment_score = (1 - row["Sentiment"]) * 50
+
+    return (
+        neg_spike_score * 0.4
+        + neg_ratio_score * 0.3
+        + news_spike_score * 0.2
+        + sentiment_score * 0.1
+    )

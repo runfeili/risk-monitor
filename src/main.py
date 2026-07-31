@@ -30,10 +30,6 @@ def main():
         setup_logger()
         logger.info(">>> RiskMonitor Started >>>")
 
-        if not check_internet():
-            logger.error("Internet unavailable.")
-            return
-
         period = build_period(
             periodicity=PERIODICITY,
             analysis_lookback=ANALYSIS_LOOKBACK,
