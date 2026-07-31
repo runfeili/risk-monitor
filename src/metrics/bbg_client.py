@@ -22,7 +22,7 @@ class BloombergClient:
         self.session_options.setServiceCheckTimeout(1000)
         self.session = blpapi.Session(self.session_options)
 
-        if not check_bbg_connection():
+        if not self.check_bbg_connection():
             raise RuntimeError(
                 "Bloomberg unavailable. Please start and login to Bloomberg Terminal."
             )
@@ -321,13 +321,13 @@ class BloombergClient:
 
         return metric_df
     
-def check_bbg_connection():
-    try:
-        socket.create_connection(
-            ("localhost", 8194),
-            timeout=3,
-        )
-        return True
+    def check_bbg_connection(self):
+        try:
+            socket.create_connection(
+                ("localhost", 8194),
+                timeout=3,
+            )
+            return True
 
-    except OSError:
-        return False
+        except OSError:
+            return False
