@@ -4,8 +4,8 @@ from context import ProjectContext
 from metrics.news_metrics import calc_news_metrics
 from metrics.financial_metrics import calc_financial_metrics
 from utils.excel_utils import export_to_excel, load_from_excel
-from utils.network_utils import check_bbg_connection
 import blpapi
+import socket
 import pandas as pd
 import logging
 
@@ -320,3 +320,14 @@ class BloombergClient:
         )
 
         return metric_df
+    
+def check_bbg_connection():
+    try:
+        socket.create_connection(
+            ("localhost", 8194),
+            timeout=3,
+        )
+        return True
+
+    except OSError:
+        return False

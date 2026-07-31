@@ -1,11 +1,11 @@
 import logging
 import pandas as pd
+import math
 from tqdm import tqdm
 from context import ProjectContext
 from llm.llm_agent import LLMAgent
 from llm.prompts import build_news_classifier_prompt
 from utils.excel_utils import export_to_excel, load_from_excel
-from utils.llm_utils import calculate_batch_size
 
 
 logger = logging.getLogger(__name__)
@@ -164,3 +164,20 @@ class NewsClassifier:
         )
         
         return risk_news_df
+
+def calculate_batch_size(
+    total_items: int,
+    max_calls: int = 20,
+    min_batch_size: int = 5,
+    max_batch_size: int = 20,
+) -> int:
+
+    if total_items <= 0:
+        return min_batch_size
+
+    batch_size = math.ceil(total_items / max_calls)
+
+    batch_size = max(batch_size, min_batch_size)
+    batch_size = min(batch_size, max_batch_size)
+
+    return batch_size
