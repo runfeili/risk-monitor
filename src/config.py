@@ -45,11 +45,7 @@ NEWS_FIELDS = [
 FINANCIAL_FIELDS = [
     "CHG_PCT_3M",
     "CHG_PCT_6M",
-    "INDUSTRY_GROUP",
     "INDUSTRY_SECTOR",
     "COUNTRY",
-    "PRIMARY_EXCHANGE"
-]
 
-INPUT_DIR = Path("input")
-INPUT_FILE = INPUT_DIR / "company_list.xlsx"
+]

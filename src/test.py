@@ -1,33 +1,18 @@
 from datetime import date, timedelta
-import pandas as pd
 from pathlib import Path
 
-from llm.news_searcher import NewsSearcher
+import pandas as pd
 
-OUTPUT_FILE = Path("test_news_add.xlsx")
+from llm.news_searcher import NewsSearcher
+from utils.excel_utils import export_to_excel
+
+OUTPUT_FILE = Path("news0730COMPANY.xlsx")
 
 def main():
-
-    # companies = [
-    #     "Southland Resources Co., Ltd",
-    #     "Mitr Phol Sugar Corporation Limited",
-    #     "Thantawan Industry Public Company Limited",
-    #     "Thai Union Group Public Company Limited",
-    #     "Panjawattana Plastic Public Company Limited",
-    #     "Anglo Singapore International Co., Ltd",
-    #     "COOEC (Thailand) Company Limited",
-    # ]
     names = [
-        "Southland Group",
-        "Mr. Pherm Tirasarnvong",
-        "Mid Siam Sugar Co., Ltd. Shareholding",
-        "Vongkusolkit family",
-        "ADPOWER INTERNATIONAL CO., LTD",
-        "Nam Archhpasit",
-        "Thai Union Group",
-        "Anglo Singapore International Group",
-        "Mr. Pariya Chunhasawatdikul",
-        "Hemmondharop family"
+       "KEX EXPRESS(TH)PCL",
+       "HONGLIN ELECTRIC POWER TECHNOLOGY (th) co.,ltd",
+       "dingheng new materials co.,ltd"
     ]
 
     end_date = date.today()
@@ -48,23 +33,26 @@ def main():
             )
 
             df = pd.DataFrame(news)
-
-            # 没有结果也跳过
+            
             if df.empty:
                 print("  ✓ No news")
                 continue
 
-            # 第一次写入，之后追加
             if OUTPUT_FILE.exists():
                 old_df = pd.read_excel(OUTPUT_FILE)
                 df = pd.concat([old_df, df], ignore_index=True)
 
-            df.to_excel(OUTPUT_FILE, index=False)
+            export_to_excel(
+                data=df,
+                file_path=OUTPUT_FILE
+            )
 
             print(f"  ✓ Appended {len(news)} news")
 
         except Exception as e:
             print(f"  ✗ Failed: {e}")
+    
+
 
     if OUTPUT_FILE.exists():
         total_news = len(pd.read_excel(OUTPUT_FILE))
