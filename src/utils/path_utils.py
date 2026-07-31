@@ -5,8 +5,8 @@ from context import FilePaths
 
 
 def build_file_paths(
-    input_file: str | Path,
-    output_root: str | Path = "output",
+    input_dir: str | Path = Path("input"),
+    output_root: str | Path = Path("output"),
 ) -> FilePaths:
 
     run_date = datetime.now().strftime("%Y%m%d")
@@ -18,7 +18,8 @@ def build_file_paths(
     )
 
     return FilePaths(
-        input=input_file,
+        company_list=input_dir / "company_list.xlsx",
+        index_mapping=input_dir / "index_mapping.xlsx",
         output_dir=output_dir,
         financial_metric=output_dir / "financial_metrics.xlsx",
         news_metric=output_dir / "news_metrics.xlsx",

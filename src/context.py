@@ -7,7 +7,8 @@ from utils.date_utils import TimePeriod
 
 @dataclass
 class FilePaths:
-    input: Path
+    company_list: Path
+    index_mapping: Path
     output_dir: Path
     financial_metric: Path
     news_metric: Path

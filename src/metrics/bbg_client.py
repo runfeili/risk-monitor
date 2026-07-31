@@ -239,11 +239,11 @@ class BloombergClient:
         cols = ["Ticker", "CompanyName"]
         cols += [col for col in news_metric_df.columns if col not in cols]
         news_metric_df = news_metric_df[cols]
-        news_metric_df.drop(columns=["BloombergAvailable"])
+        news_metric_df = news_metric_df.drop(columns=["BloombergAvailable"])
         export_to_excel(
             data=news_metric_df,
-            file_path=context.paths.news_metric, 
-            sheet_name="NewsMetrics"
+            file_path=context.paths.news_metric,
+            sheet_name="NewsMetrics",
         )
         return news_metric_df
 
@@ -262,27 +262,68 @@ class BloombergClient:
 
         tickers = context.bbg_companies_df["Ticker"].dropna().tolist()
 
-        financial_data = self.get_reference_data(
+        company_df = self.get_reference_data(
             tickers=tickers,
             fields=FINANCIAL_FIELDS,
         )
 
-        results_df = calc_financial_metrics(financial_data)
+        mapping_df = load_from_excel(context.paths.index_mapping, sheet_name="mapping")
+
+        company_df = company_df.merge(
+            mapping_df,
+            left_on=["COUNTRY", "INDUSTRY_SECTOR"],
+            right_on=["Country", "Industry"],
+            how="left",
+        )
+
+        missing_index = company_df["Index"].isna().sum()
+        if missing_index > 0:
+            logger.warning(
+                "%d companies do not have benchmark index mapping.",
+                missing_index,
+            )
+
+        benchmark_tickers = company_df["Index"].dropna().unique().tolist()
+        index_df = self.get_reference_data(
+            tickers=benchmark_tickers, fields=FINANCIAL_FIELDS
+        )
+
+        index_df = index_df[
+            [
+                "Ticker",
+                "CHG_PCT_3M",
+                "CHG_PCT_6M",
+            ]
+        ].rename(
+            columns={
+                "Ticker": "Index",
+                "CHG_PCT_3M": "INDEX_CHG_PCT_3M",
+                "CHG_PCT_6M": "INDEX_CHG_PCT_6M",
+            }
+        )
+
+        results_df = calc_financial_metrics(
+            company_df,
+            index_df,
+        )
 
         financial_metric_df = results_df.merge(
             context.bbg_companies_df,
             on="Ticker",
             how="left",
         )
-
-        cols = ["Ticker", "CompanyName"]
-        cols += [col for col in financial_metric_df.columns if col not in cols]
-        financial_metric_df = financial_metric_df[cols]
-
-        financial_metric_df = financial_metric_df.drop(
-            columns=["BloombergAvailable"],
-            errors="ignore",
-        )
+        financial_metric_df = financial_metric_df[
+            [
+                "Ticker",
+                "CompanyName",
+                "Stock_3M",
+                "Benchmark_3M",
+                "Relative_3M",
+                "Stock_6M",
+                "Benchmark_6M",
+                "Relative_6M",
+            ]
+        ]
 
         export_to_excel(
             data=financial_metric_df,
@@ -320,7 +361,7 @@ class BloombergClient:
         )
 
         return metric_df
-    
+
     def check_bbg_connection(self):
         try:
             socket.create_connection(
