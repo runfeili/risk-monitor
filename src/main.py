@@ -41,7 +41,7 @@ def main():
         )
         paths = build_file_paths(INPUT_FILE)
         companies = load_from_excel(paths.input)
-        bbg_companies_df = companies["bbg_avaliable"].drop(columns=["SearchName"])
+        bbg_companies_df = companies["bbg_avaliable"]
         bbg_companies_df["BloombergAvailable"] = True
         nonbbg_companies_df = companies["bbg_unavailable"]
         nonbbg_companies_df["BloombergAvailable"] = False
@@ -98,7 +98,7 @@ def main():
         success = True
 
     except Exception as e:
-        logger.exception(e)
+        logger.error(e)
         return
 
     finally:
