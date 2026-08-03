@@ -86,13 +86,14 @@ def main():
                 "LlmNews": context.llm_news_df,
             },
             context.paths.report,
+            disclaimer_path=context.paths.disclaimer,
         )
         logger.info(f"Result exported to: {context.paths.report}")
 
         success = True
 
     except Exception:
-        logger.exception()
+        logger.exception("Error occurred:")
         return
 
     finally:

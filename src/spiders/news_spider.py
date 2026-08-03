@@ -80,7 +80,6 @@ class NewsSpider:
                 results.append(
                     {
                         "CompanyName": company,
-                        "BloombergAvailable": row["BloombergAvailable"],
                         "Date": published_date,
                         "Title": news.get("title", ""),
                         "Source": news.get("publisher", {}).get("title", ""),
