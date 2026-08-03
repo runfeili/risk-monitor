@@ -479,12 +479,14 @@ Bloomberg unavailable. Please start and login to Bloomberg Terminal.
 
 ### 6.3 如何重新运行某一个模块
 
-项目支持基于输出文件和配置项控制模块是否重新执行。默认情况下，程序会优先复用已有输出结果；如需重新执行某个模块，可删除对应输出文件，或通过配置文件开启/关闭对应功能。
+项目支持基于输出文件和配置项控制模块是否重新执行。
 
-删除 news_metric.xlsx 或 financial_metric.xlsx，重新获取 Bloomberg 新闻指标或金融指标数据。
-删除 raw_news.xlsx，重新执行 Google News 抓取模块；
-删除 risk_news.xlsx，并确保配置文件中 RUN_NEWS_CLASSIFIER = True，重新执行新闻风险分类模块；
-删除 llm_news.xlsx，并确保配置文件中 RUN_LLM_NEWS_SEARCH = True，重新执行新闻联网搜索模块；
+默认情况下，程序会优先复用已有输出结果；如需重新执行某个模块，可删除对应输出文件，或通过配置文件开启/关闭对应功能。
+
+- 删除 `news_metric.xlsx` 或 `financial_metric.xlsx`，重新获取 Bloomberg 新闻指标或财务指标数据。
+- 删除 `raw_news.xlsx`，重新执行 Google News 抓取模块；
+- 在配置文件 `config.py` 中设置 `RUN_NEWS_CLASSIFIER = True`，重新执行新闻风险分类模块；
+- 在配置文件 `config.py` 中设置 `RUN_LLM_NEWS_SEARCH = True`，重新执行新闻联网搜索模块；
 
 已存在的输出结果文件会被程序读取并复用。
 
