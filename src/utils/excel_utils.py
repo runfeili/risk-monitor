@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from openpyxl.styles import Alignment
 from numbers import Number
+from openpyxl import Workbook, load_workbook
 
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ def export_to_excel(
     data: pd.DataFrame | dict[str, pd.DataFrame],
     file_path: Path | str,
     sheet_name="Sheet1",
+    disclaimer_path: Path | str | None = None,
 ):
     file_path = Path(file_path)
     file_path.parent.mkdir(
@@ -31,10 +33,18 @@ def export_to_excel(
         if isinstance(data, pd.DataFrame):
             data = {sheet_name: data}
 
+        if disclaimer_path is not None:
+            workbook = load_workbook(disclaimer_path)
+        else:
+            workbook = Workbook()
+            workbook.remove(workbook.active)
+
         with pd.ExcelWriter(
             file_path,
             engine="openpyxl",
         ) as writer:
+            writer._book = workbook
+
             for sheet_name, df in data.items():
                 df = format_dataframe(df)
 

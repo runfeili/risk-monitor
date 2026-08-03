@@ -20,6 +20,7 @@ def build_file_paths(
     return FilePaths(
         company_list=input_dir / "company_list.xlsx",
         index_mapping=input_dir / "index_mapping.xlsx",
+        disclaimer=input_dir / "disclaimer.xlsx",
         output_dir=output_dir,
         financial_metric=output_dir / "financial_metrics.xlsx",
         news_metric=output_dir / "news_metrics.xlsx",

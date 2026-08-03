@@ -9,6 +9,7 @@ from utils.date_utils import TimePeriod
 class FilePaths:
     company_list: Path
     index_mapping: Path
+    disclaimer: Path
     output_dir: Path
     financial_metric: Path
     news_metric: Path
